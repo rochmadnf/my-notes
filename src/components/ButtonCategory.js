@@ -8,7 +8,7 @@ class ButtonCategory extends Component {
       ${
         this.props.dataLabel === this.props.activeClass
           ? "text-blue-400 border-b-4 border-b-blue-400"
-          : "text-slate-200 border-b-slate-200"
+          : "text-slate-300"
       }
       hover:border-b-blue-300 hover:text-blue-300`}
         data-label={this.props.dataLabel}

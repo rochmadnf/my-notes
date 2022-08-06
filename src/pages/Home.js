@@ -8,42 +8,90 @@ class Home extends Component {
     super(props);
 
     this.state = {
-      all: [
-        ...getInitialData(),
-        ...JSON.parse(sessionStorage.getItem("notes")),
-      ],
-      notes: [
-        ...getInitialData(),
-        ...JSON.parse(sessionStorage.getItem("notes")),
-      ],
-      activeCategory: "activeNote",
+      notes: JSON.parse(sessionStorage.getItem("notes")) ?? getInitialData(),
+      activeCategory: "allNote",
       querySearch: "",
     };
 
     this.onClickCategoryNote = this.onClickCategoryNote.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onDeleteClick = this.onDeleteClick.bind(this);
+    this.onArchiveClick = this.onArchiveClick.bind(this);
   }
 
   componentDidMount() {
     const storage = sessionStorage.getItem("notes");
-    if (!storage) sessionStorage.setItem("notes", JSON.stringify([]));
+    if (!storage)
+      sessionStorage.setItem("notes", JSON.stringify(getInitialData()));
+  }
+
+  onDeleteClick(event) {
+    const updateNotes = JSON.parse(sessionStorage.getItem("notes")).filter(
+      (note) => note.id != event.target.getAttribute("data-id")
+    );
+    sessionStorage.setItem("notes", JSON.stringify(updateNotes));
+    this.setState(() => {
+      return {
+        notes: JSON.parse(sessionStorage.getItem("notes")),
+      };
+    });
+  }
+
+  onArchiveClick(event) {
+    const updateNotes = JSON.parse(sessionStorage.getItem("notes")).map(
+      (note) => {
+        if (note.id == event.target.getAttribute("data-id")) {
+          return { ...note, archived: !note.archived };
+        }
+        return note;
+      }
+    );
+    sessionStorage.setItem("notes", JSON.stringify(updateNotes));
+    this.onNotesChanges(JSON.parse(sessionStorage.getItem("notes")));
+  }
+
+  onNotesChanges(notes) {
+    const archived = this.state.activeCategory === "activeNote" ? false : true;
+    const query = document.getElementById("search-note").value.toLowerCase();
+    if (this.state.activeCategory !== "allNote") {
+      notes = notes.filter(
+        (note) =>
+          note.title.toLowerCase().includes(query) && note.archived === archived
+      );
+    }
+    this.setState(() => {
+      return {
+        notes,
+      };
+    });
   }
 
   onClickCategoryNote(event) {
-    if (this.state.activeCategory !== event.target.getAttribute("data-label")) {
-      const archived =
-        this.state.activeCategory === "activeNote" ? true : false;
-      let query = document.getElementById("search-note").value;
+    if (event.target.getAttribute("data-label") === "allNote") {
       this.setState(() => {
         return {
           activeCategory: event.target.getAttribute("data-label"),
-          notes: this.state.all.filter(
-            (note) =>
-              note.title.toLowerCase().includes(query.toLowerCase()) &&
-              note.archived === archived
-          ),
+          notes: JSON.parse(sessionStorage.getItem("notes")),
         };
       });
+    } else {
+      if (
+        this.state.activeCategory !== event.target.getAttribute("data-label")
+      ) {
+        const archived =
+          this.state.activeCategory === "activeNote" ? true : false;
+        let query = document.getElementById("search-note").value;
+        this.setState(() => {
+          return {
+            activeCategory: event.target.getAttribute("data-label"),
+            notes: JSON.parse(sessionStorage.getItem("notes")).filter(
+              (note) =>
+                note.title.toLowerCase().includes(query.toLowerCase()) &&
+                note.archived === archived
+            ),
+          };
+        });
+      }
     }
   }
 
@@ -51,7 +99,7 @@ class Home extends Component {
     const archived = this.state.activeCategory === "activeNote" ? false : true;
     this.setState(() => {
       return {
-        notes: this.state.all.filter(
+        notes: JSON.parse(sessionStorage.getItem("notes")).filter(
           (note) =>
             note.title
               .toLowerCase()
@@ -91,6 +139,12 @@ class Home extends Component {
         <div className="flex flex-col gap-10 pb-10">
           <div className="flex flex-col sm:flex-row mx-6 gap-8">
             <ButtonCategory
+              label="All Notes"
+              dataLabel="allNote"
+              activeClass={this.state.activeCategory}
+              whenClick={this.onClickCategoryNote}
+            />
+            <ButtonCategory
               label="Active Notes"
               dataLabel="activeNote"
               activeClass={this.state.activeCategory}
@@ -106,10 +160,17 @@ class Home extends Component {
 
           <div className="flex flex-wrap mx-6 border rounded-md border-slate-200 justify-start gap-4 p-8 content-center items-center">
             {this.state.notes.length === 0 ? (
-              <div className="text-lg">Notes are not available</div>
+              <div className="text-lg text-center w-full">
+                Notes are not available
+              </div>
             ) : (
               this.state.notes.map((note) => (
-                <CardNote note={note} key={note.id} />
+                <CardNote
+                  note={note}
+                  key={note.id}
+                  onDeleteClick={this.onDeleteClick}
+                  onArchiveClick={this.onArchiveClick}
+                />
               ))
             )}
           </div>

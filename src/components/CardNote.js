@@ -19,11 +19,23 @@ class CardNote extends Component {
           <p className="text-gray-800">{this.props.note.body}</p>
         </article>
         <div className="absolute bottom-0 flex gap-4 p-4">
-          <button className="text-white text-sm bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full">
+          <button
+            className="text-white text-sm bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full"
+            data-id={this.props.note.id}
+            onClick={this.props.onDeleteClick}
+          >
             Delete
           </button>
-          <button className="px-4 py-2 text-white text-sm bg-amber-500 hover:bg-amber-600 rounded-full">
-            Archive
+          <button
+            data-id={this.props.note.id}
+            className={`px-4 py-2 text-white text-sm rounded-full ${
+              this.props.note.archived
+                ? "bg-green-500 hover:bg-green-600"
+                : "bg-amber-500 hover:bg-amber-600"
+            }`}
+            onClick={this.props.onArchiveClick}
+          >
+            {this.props.note.archived ? "Unarchive" : "Archive"}
           </button>
         </div>
       </div>
