@@ -43,19 +43,33 @@ class CreateNote extends Component {
         >
           {/* input */}
           <div className="flex flex-col mb-5 gap-1">
-            <label htmlFor="title" className="font-medium text-base sm:text-lg">
-              Title
-            </label>
+            <div className="flex justify-between items-center">
+              <label
+                htmlFor="title"
+                className="font-medium text-base sm:text-lg"
+              >
+                Title
+              </label>
+              <small className="text-xs self-end">
+                Remaining characters:{" "}
+                <span className="text-neutral-900 font-bold">
+                  {50 - this.state.title.length}
+                </span>
+              </small>
+            </div>
             <input
               type="text"
               className="outline-none rounded-md border-slate-300 form-input focus:outline-none focus:border-blue-300 focus:shadow focus:shadow-blue-300"
               name="title"
               placeholder="Title here..."
-              onChange={(event) =>
+              value={this.state.title}
+              onChange={(event) => {
                 this.setState(() => {
-                  return { title: event.target.value };
-                })
-              }
+                  if (this.state.title.length < 50) {
+                    return { title: event.target.value };
+                  }
+                });
+              }}
             />
           </div>
 

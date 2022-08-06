@@ -9,7 +9,7 @@ class CardNote extends Component {
         id={this.props.note.id}
         className="relative flex flex-col border border-blue-400 p-4 w-80 rounded-lg h-80"
       >
-        <h1 className="font-bold text-xl text-blue-500">
+        <h1 className="font-bold text-xl text-blue-500 break-words">
           {this.props.note.title}
         </h1>
         <article className="flex flex-col gap-2">
