@@ -27,7 +27,7 @@ class Home extends Component {
 
   onDeleteClick(event) {
     const updateNotes = JSON.parse(sessionStorage.getItem("notes")).filter(
-      (note) => note.id != event.target.getAttribute("data-id")
+      (note) => note.id !== Number(event.target.getAttribute("data-id"))
     );
     sessionStorage.setItem("notes", JSON.stringify(updateNotes));
     this.setState(() => {
@@ -40,74 +40,51 @@ class Home extends Component {
   onArchiveClick(event) {
     const updateNotes = JSON.parse(sessionStorage.getItem("notes")).map(
       (note) => {
-        if (note.id == event.target.getAttribute("data-id")) {
+        if (note.id === Number(event.target.getAttribute("data-id"))) {
           return { ...note, archived: !note.archived };
         }
         return note;
       }
     );
     sessionStorage.setItem("notes", JSON.stringify(updateNotes));
-    this.onNotesChanges(JSON.parse(sessionStorage.getItem("notes")));
+    this.onNotesChanges(
+      JSON.parse(sessionStorage.getItem("notes")),
+      this.state.activeCategory
+    );
   }
 
-  onNotesChanges(notes) {
-    const archived = this.state.activeCategory === "activeNote" ? false : true;
+  onNotesChanges(notes, activeTab) {
     const query = document.getElementById("search-note").value.toLowerCase();
-    if (this.state.activeCategory !== "allNote") {
+    if (activeTab !== "allNote") {
+      const archived = activeTab === "activeNote" ? false : true;
       notes = notes.filter(
         (note) =>
           note.title.toLowerCase().includes(query) && note.archived === archived
       );
+    } else {
+      notes = notes.filter((note) => note.title.toLowerCase().includes(query));
     }
-    this.setState(() => {
+
+    return this.setState(() => {
       return {
         notes,
+        activeCategory: activeTab,
       };
     });
   }
 
   onClickCategoryNote(event) {
-    if (event.target.getAttribute("data-label") === "allNote") {
-      this.setState(() => {
-        return {
-          activeCategory: event.target.getAttribute("data-label"),
-          notes: JSON.parse(sessionStorage.getItem("notes")),
-        };
-      });
-    } else {
-      if (
-        this.state.activeCategory !== event.target.getAttribute("data-label")
-      ) {
-        const archived =
-          this.state.activeCategory === "activeNote" ? true : false;
-        let query = document.getElementById("search-note").value;
-        this.setState(() => {
-          return {
-            activeCategory: event.target.getAttribute("data-label"),
-            notes: JSON.parse(sessionStorage.getItem("notes")).filter(
-              (note) =>
-                note.title.toLowerCase().includes(query.toLowerCase()) &&
-                note.archived === archived
-            ),
-          };
-        });
-      }
-    }
+    this.onNotesChanges(
+      JSON.parse(sessionStorage.getItem("notes")),
+      event.target.getAttribute("data-label")
+    );
   }
 
   onSearchChange(event) {
-    const archived = this.state.activeCategory === "activeNote" ? false : true;
-    this.setState(() => {
-      return {
-        notes: JSON.parse(sessionStorage.getItem("notes")).filter(
-          (note) =>
-            note.title
-              .toLowerCase()
-              .includes(event.target.value.toLowerCase()) &&
-            note.archived === archived
-        ),
-      };
-    });
+    this.onNotesChanges(
+      JSON.parse(sessionStorage.getItem("notes")),
+      this.state.activeCategory
+    );
   }
 
   render() {
@@ -158,7 +135,7 @@ class Home extends Component {
             />
           </div>
 
-          <div className="flex flex-wrap mx-6 border rounded-md border-slate-200 justify-start gap-4 p-8 content-center items-center">
+          <div className="flex flex-wrap mx-6 border rounded-md border-slate-200 justify-center gap-4 p-8 content-center items-center">
             {this.state.notes.length === 0 ? (
               <div className="text-lg text-center w-full">
                 Notes are not available
