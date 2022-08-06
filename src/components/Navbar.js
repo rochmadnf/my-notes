@@ -11,7 +11,9 @@ class Navbar extends Component {
             alt="logo"
           />
         </div>
-        <h1 className="text-3xl font-bold text-slate-50">Rochmad Notes</h1>
+        <h1 className="text-xl sm:text-3xl font-bold text-slate-50">
+          Rochmad Notes
+        </h1>
       </nav>
     );
   }
